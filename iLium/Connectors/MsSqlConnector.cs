@@ -16,6 +16,11 @@ namespace iLium
             _mssqlmethods = new MsSqlMethods(connectionString);
         }
 
+        public MsSqlConnector(string connectionString, bool closeConnection)
+        {
+            _mssqlmethods = new MsSqlMethods(connectionString, closeConnection);
+        }
+
         public override void Fill(DataTable dataTable, string procedureName, params object[] parameters)
         {
             _mssqlmethods.Fill(dataTable, procedureName, parameters);
@@ -39,6 +44,11 @@ namespace iLium
         public override bool ExecuteBulkQuery(IList<string> _sqlQuery)
         {
             return _mssqlmethods.ExecuteBulkQuery(_sqlQuery);
+        }
+
+        public override void CloseConnection()
+        { 
+            _mssqlmethods.CloseConnection();
         }
     }
 }

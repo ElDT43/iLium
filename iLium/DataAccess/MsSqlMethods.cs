@@ -10,11 +10,20 @@ namespace iLium.DataAccess
     public class MsSqlMethods
     {
         private SqlConnection _sqlConnection;
+        private bool _closeConnection;
+
+        public MsSqlMethods(string connectionString, bool closeConnection = true)
+        {
+            _sqlConnection = new SqlConnection(connectionString);
+            _closeConnection = closeConnection;
+        }
 
         public MsSqlMethods(string connectionString)
         {
             _sqlConnection = new SqlConnection(connectionString);
+            _closeConnection = true;
         }
+
 
         public void Fill(DataTable dataTable, string procedureName, params object[] parameters)
         {
@@ -27,7 +36,7 @@ namespace iLium.DataAccess
             SqlDataAdapter sqlAdapter = new SqlDataAdapter();
             sqlAdapter.SelectCommand = cmd;
 
-            _sqlConnection.Open();
+            this.OpenConnection();
 
             using (SqlTransaction sqlTransaction = _sqlConnection.BeginTransaction())
             {
@@ -46,14 +55,9 @@ namespace iLium.DataAccess
                 }
                 finally
                 {
-                    if (_sqlConnection.State == ConnectionState.Open)
-                        _sqlConnection.Close();
+                    this.CloseConnection();
 
-                    _sqlConnection.Dispose();
-
-                    sqlAdapter.Dispose();
-
-                    GC.SuppressFinalize(_sqlConnection);
+                    cmd.Dispose();
                 }
             }
         }
@@ -69,7 +73,7 @@ namespace iLium.DataAccess
             DataTable dt = new DataTable();
             try
             {
-                _sqlConnection.Open();
+                this.OpenConnection();
 
                 SqlDataReader reader = cmd.ExecuteReader();
 
@@ -82,13 +86,9 @@ namespace iLium.DataAccess
             }
             finally
             {
-               if (_sqlConnection.State == ConnectionState.Open)
-                    _sqlConnection.Close();
+                this.CloseConnection();
 
-                _sqlConnection.Dispose();
                 cmd.Dispose();
-
-                GC.SuppressFinalize(_sqlConnection);
             }
 
             return dt;
@@ -104,7 +104,7 @@ namespace iLium.DataAccess
 
             try
             {
-                _sqlConnection.Open();
+                this.OpenConnection();
 
                 SqlDataReader reader = cmd.ExecuteReader();
 
@@ -116,20 +116,17 @@ namespace iLium.DataAccess
             }
             finally
             {
-                if (_sqlConnection.State == ConnectionState.Open)
-                    _sqlConnection.Close();
+                this.CloseConnection();
 
-                _sqlConnection.Dispose();
                 cmd.Dispose();
-                GC.SuppressFinalize(_sqlConnection);
             }
             return dt;
         }
 
         public int ExecuteNonQuery(string query, params object[] parameters)
         {
-            
-            _sqlConnection.Open();
+
+            this.OpenConnection();
 
             int ret = 0;
 
@@ -155,11 +152,7 @@ namespace iLium.DataAccess
                 }
                 finally
                 {
-                    if (_sqlConnection.State == ConnectionState.Open)
-                        _sqlConnection.Close();
-
-                    _sqlConnection.Dispose();
-                    GC.SuppressFinalize(_sqlConnection);
+                    this.CloseConnection();
                 }
             }
 
@@ -170,7 +163,7 @@ namespace iLium.DataAccess
         {
             if (_sqlQuery.Count() == 0) { return false; }
 
-            _sqlConnection.Open();
+            this.OpenConnection();
 
             var returnflag = true;
 
@@ -203,16 +196,32 @@ namespace iLium.DataAccess
                 }
                 finally
                 {
-                    //CONNECTION CLOSE AND DISPOSE
-                    if (_sqlConnection.State == ConnectionState.Open) { _sqlConnection.Close(); }
-
-                    _sqlConnection.Dispose();
-
-                    GC.SuppressFinalize(_sqlConnection);
+                    this.CloseConnection();
                 }
             }
 
             return returnflag;
+        }
+
+        public void CloseConnection()
+        {
+            if (_closeConnection)
+            {
+
+                if (_sqlConnection.State == ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+
+                    GC.SuppressFinalize(_sqlConnection);
+                    _sqlConnection.Dispose();
+                }
+            }
+        }
+
+        private void OpenConnection()
+        {
+            if (_sqlConnection.State != ConnectionState.Open)
+                _sqlConnection.Open();
         }
     }
 }

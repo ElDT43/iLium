@@ -9,36 +9,46 @@ namespace iLium
 {
     public class MySqlConnector : Connector
     {
-        private MySqlMethods _mssqlmethods;
+        private MySqlMethods _mysqlmethods;
 
         public MySqlConnector(string connectionString)
         {
-            _mssqlmethods = new MySqlMethods(connectionString);
+            _mysqlmethods = new MySqlMethods(connectionString);
+        }
+
+        public MySqlConnector(string connectionString, bool closeConnection)
+        {
+            _mysqlmethods = new MySqlMethods(connectionString, closeConnection);
         }
 
         public override void Fill(DataTable dataTable, string procedureName, params object[] parameters)
         {
-            _mssqlmethods.Fill(dataTable, procedureName, parameters);
+            _mysqlmethods.Fill(dataTable, procedureName, parameters);
         }
 
         public override DataTable ExecuteProcedure(string procedureName, params object[] parameters)
         {
-            return _mssqlmethods.ExecuteProcedure(procedureName, parameters);
+            return _mysqlmethods.ExecuteProcedure(procedureName, parameters);
         }
 
         public override DataTable ExecuteQuery(string query)
         {
-            return _mssqlmethods.ExecuteQuery(query);
+            return _mysqlmethods.ExecuteQuery(query);
         }
 
         public override int ExecuteNonQuery(string query, params object[] parameters)
         {
-            return _mssqlmethods.ExecuteNonQuery(query, parameters);
+            return _mysqlmethods.ExecuteNonQuery(query, parameters);
         }
 
         public override bool ExecuteBulkQuery(IList<string> _sqlQuery)
         {
-            return _mssqlmethods.ExecuteBulkQuery(_sqlQuery);
+            return _mysqlmethods.ExecuteBulkQuery(_sqlQuery);
+        }
+        
+        public override void CloseConnection()
+        {
+            _mysqlmethods.CloseConnection();
         }
     }
 }

@@ -10,8 +10,14 @@ namespace iLium.DataAccess
     public class MySqlMethods
     {
         private MySqlConnection _mySqlConnection;
+        private bool _closeConnection;
 
         public MySqlMethods(string connectionString)
+        {
+            _mySqlConnection = new MySqlConnection(connectionString);
+        }
+
+        public MySqlMethods(string connectionString, bool closeConnection = true)
         {
             _mySqlConnection = new MySqlConnection(connectionString);
         }
@@ -26,7 +32,8 @@ namespace iLium.DataAccess
 
             var mysqlAdapter = new MySqlDataAdapter();
             mysqlAdapter.SelectCommand = cmd;
-            _mySqlConnection.Open();
+
+            this.OpenConnection();
 
             using (MySqlTransaction mysqlTransaction = _mySqlConnection.BeginTransaction())
             {
@@ -45,10 +52,8 @@ namespace iLium.DataAccess
                 }
                 finally
                 {
-                    if (_mySqlConnection.State == ConnectionState.Open)
-                        _mySqlConnection.Close();
+                    this.CloseConnection();
 
-                    _mySqlConnection.Dispose();
                     mysqlAdapter.Dispose();
                 }
             }
@@ -65,7 +70,7 @@ namespace iLium.DataAccess
             DataTable dt = new DataTable();
             try
             {
-                _mySqlConnection.Open();
+                this.OpenConnection();
 
                 MySqlDataReader reader = cmd.ExecuteReader();
 
@@ -78,13 +83,9 @@ namespace iLium.DataAccess
             }
             finally
             {
-                if (_mySqlConnection.State == ConnectionState.Open)
-                    _mySqlConnection.Close();
+                this.CloseConnection();
 
-                _mySqlConnection.Dispose();
                 cmd.Dispose();
-
-                GC.SuppressFinalize(_mySqlConnection);
             }
 
             return dt;
@@ -100,7 +101,7 @@ namespace iLium.DataAccess
 
             try
             {
-                _mySqlConnection.Open();
+                this.OpenConnection();
 
                 MySqlDataReader reader = cmd.ExecuteReader();
 
@@ -112,10 +113,8 @@ namespace iLium.DataAccess
             }
             finally
             {
-                if (_mySqlConnection.State == ConnectionState.Open)
-                    _mySqlConnection.Close();
+                this.CloseConnection();
 
-                _mySqlConnection.Dispose();
                 cmd.Dispose();
             }
             return dt;
@@ -123,7 +122,7 @@ namespace iLium.DataAccess
 
         public int ExecuteNonQuery(string query, params object[] parameters)
         {
-            _mySqlConnection.Open();
+            this.OpenConnection();
 
             int ret = 0;
 
@@ -149,11 +148,7 @@ namespace iLium.DataAccess
                 }
                 finally
                 {
-                    if (_mySqlConnection.State == ConnectionState.Open)
-                        _mySqlConnection.Close();
-
-                    _mySqlConnection.Dispose();
-                    GC.SuppressFinalize(_mySqlConnection);
+                    this.CloseConnection();
                 }
             }
 
@@ -163,8 +158,6 @@ namespace iLium.DataAccess
         public bool ExecuteBulkQuery(IList<string> _sqlQuery)
         {
             if (_sqlQuery.Count() == 0) { return false; }
-
-            _mySqlConnection.Open();
 
             var _returnflag = true;
 
@@ -196,16 +189,33 @@ namespace iLium.DataAccess
                 }
                 finally
                 {
-                    //CONNECTION CLOSE AND DISPOSE
-                    if (_mySqlConnection.State == ConnectionState.Open) { _mySqlConnection.Close(); }
-
-                    _mySqlConnection.Dispose();
-
-                    GC.SuppressFinalize(_mySqlConnection);
+                    this.CloseConnection();
                 }
             }
 
             return _returnflag;
+        }
+
+
+        public void CloseConnection()
+        {
+
+            if (_closeConnection)
+            {
+                if (_mySqlConnection.State == ConnectionState.Open)
+                {
+                    _mySqlConnection.Close();
+
+                    GC.SuppressFinalize(_mySqlConnection);
+                    _mySqlConnection.Dispose();
+                }
+            }
+        }
+
+        private void OpenConnection()
+        {
+            if (_mySqlConnection.State != ConnectionState.Open) 
+                _mySqlConnection.Open();
         }
     }
 }
