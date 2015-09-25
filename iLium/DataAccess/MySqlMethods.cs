@@ -159,6 +159,8 @@ namespace iLium.DataAccess
         {
             if (_sqlQuery.Count() == 0) { return false; }
 
+            this.OpenConnection();
+
             var _returnflag = true;
 
             using (MySqlTransaction _transaction = _mySqlConnection.BeginTransaction())

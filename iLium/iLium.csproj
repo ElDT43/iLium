@@ -51,6 +51,7 @@
     <Compile Include="Extensions\DataTableExtensions.cs" />
     <Compile Include="DataAccess\MsSqlMethods.cs" />
     <Compile Include="DataAccess\MySqlMethods.cs" />
+    <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
