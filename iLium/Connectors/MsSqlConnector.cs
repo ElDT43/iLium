@@ -46,9 +46,9 @@ namespace iLium
             return _mssqlmethods.ExecuteBulkQuery(_sqlQuery);
         }
 
-        public override void CloseConnection()
+        public override void KillConnections()
         { 
-            _mssqlmethods.CloseConnection();
+            _mssqlmethods.KillConnections();
         }
     }
 }

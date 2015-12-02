@@ -45,10 +45,10 @@ namespace iLium
         {
             return _mysqlmethods.ExecuteBulkQuery(_sqlQuery);
         }
-        
-        public override void CloseConnection()
+
+        public override void KillConnections()
         {
-            _mysqlmethods.CloseConnection();
+            _mysqlmethods.KillConnections();
         }
     }
 }

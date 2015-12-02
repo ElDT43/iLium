@@ -203,7 +203,7 @@ namespace iLium.DataAccess
             return returnflag;
         }
 
-        public void CloseConnection()
+        private void CloseConnection()
         {
             if (_closeConnection)
             {
@@ -215,6 +215,17 @@ namespace iLium.DataAccess
                     GC.SuppressFinalize(_sqlConnection);
                     _sqlConnection.Dispose();
                 }
+            }
+        }
+
+        public void KillConnections() 
+        {
+            if (_sqlConnection.State == ConnectionState.Open)
+            {
+                _sqlConnection.Close();
+
+                GC.SuppressFinalize(_sqlConnection);
+                _sqlConnection.Dispose();
             }
         }
 

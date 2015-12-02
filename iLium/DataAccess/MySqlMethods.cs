@@ -199,11 +199,11 @@ namespace iLium.DataAccess
         }
 
 
-        public void CloseConnection()
+        private void CloseConnection()
         {
-
             if (_closeConnection)
             {
+
                 if (_mySqlConnection.State == ConnectionState.Open)
                 {
                     _mySqlConnection.Close();
@@ -211,6 +211,17 @@ namespace iLium.DataAccess
                     GC.SuppressFinalize(_mySqlConnection);
                     _mySqlConnection.Dispose();
                 }
+            }
+        }
+
+        public void KillConnections()
+        {
+            if (_mySqlConnection.State == ConnectionState.Open)
+            {
+                _mySqlConnection.Close();
+
+                GC.SuppressFinalize(_mySqlConnection);
+                _mySqlConnection.Dispose();
             }
         }
 

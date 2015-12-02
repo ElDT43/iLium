@@ -13,6 +13,6 @@ namespace iLium
         public abstract DataTable ExecuteQuery(string query);
         public abstract int ExecuteNonQuery(string query, params object[] parameters);
         public abstract bool ExecuteBulkQuery(IList<string> _sqlQuery);
-        public abstract void CloseConnection();
+        public abstract void KillConnections();
     }
  }
